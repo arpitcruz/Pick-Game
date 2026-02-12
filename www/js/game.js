@@ -641,7 +641,7 @@
     // rope + claw
     var tip = getClawTip();
     drawRope(pivotX, pivotY, tip.x, tip.y);
-    drawClaw(tip.x, tip.y, armAngle, grabbedItem != null);
+    drawClaw(tip.x, tip.y, 0, grabbedItem != null);
     drawPivot();
 
     // particles on top
@@ -746,12 +746,15 @@
     haptic('LIGHT');
   }
 
-  $tapZone.addEventListener('touchstart', onTap, { passive: false });
-  $tapZone.addEventListener('mousedown', onTap);
-
-  // also allow tapping anywhere on canvas
-  $canvas.addEventListener('touchstart', onTap, { passive: false });
-  $canvas.addEventListener('mousedown', onTap);
+  // tap anywhere on screen to grab
+  document.addEventListener('touchstart', function (e) {
+    if (!running) return;
+    onTap(e);
+  }, { passive: false });
+  document.addEventListener('mousedown', function (e) {
+    if (!running) return;
+    onTap(e);
+  });
 
   /* ---------- buttons ---------- */
   $btnPlay.addEventListener('click', function () { startGame(); });

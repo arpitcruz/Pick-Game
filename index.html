@@ -221,8 +221,8 @@ html,body{
       </div>
     </div>
     <canvas id="game-canvas"></canvas>
-    <div id="tap-zone">
-      <div id="tap-hint">TAP!</div>
+    <div id="tap-zone" style="pointer-events:none">
+      <div id="tap-hint">TAP ANYWHERE!</div>
     </div>
   </div>
 
@@ -643,7 +643,7 @@ html,body{
     }
     var tip2 = getClawTip();
     drawRope(pivotX, pivotY, tip2.x, tip2.y);
-    drawClaw(tip2.x, tip2.y, armAngle, grabbedItem != null);
+    drawClaw(tip2.x, tip2.y, 0, grabbedItem != null);
     drawPivot(); drawParticles();
   }
 
@@ -706,10 +706,14 @@ html,body{
     armState = 'extending'; sfxExtend(); haptic('LIGHT');
   }
 
-  $tapZone.addEventListener('touchstart', onTap, { passive: false });
-  $tapZone.addEventListener('mousedown', onTap);
-  $canvas.addEventListener('touchstart', onTap, { passive: false });
-  $canvas.addEventListener('mousedown', onTap);
+  document.addEventListener('touchstart', function (e) {
+    if (!running) return;
+    onTap(e);
+  }, { passive: false });
+  document.addEventListener('mousedown', function (e) {
+    if (!running) return;
+    onTap(e);
+  });
 
   $btnPlay.addEventListener('click', function () { startGame(); });
   $btnRetry.addEventListener('click', function () { startGame(); });

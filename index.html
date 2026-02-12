@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0e1a">
+  <title>Pick Game</title>
+  <style>
+/* ========== RESET & BASE ========== */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  width:100%;height:100%;
+  overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:#0a0e1a;
+  color:#fff;
+  touch-action:none;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+/* ========== SCREENS ========== */
+.screen{
+  position:fixed;inset:0;
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:1;
+  will-change:opacity;
+  transition:opacity .3s ease;
+}
+.screen.active{display:flex}
+.screen canvas{position:absolute;inset:0;z-index:0;pointer-events:none}
+.screen-inner{position:relative;z-index:1;text-align:center;padding:20px;width:100%;max-width:400px}
+
+/* ========== START SCREEN ========== */
+.logo-area{margin-bottom:30px}
+.claw-icon{margin:0 auto 12px;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.logo-area h1{
+  font-size:42px;font-weight:900;letter-spacing:4px;
+  background:linear-gradient(135deg,#FFD700,#FFA000);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-shadow:none;
+}
+.tagline{color:#8892b0;font-size:14px;margin-top:6px;letter-spacing:2px}
+
+.best-box{
+  display:inline-flex;gap:10px;align-items:center;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:10px 24px;margin-bottom:28px;
+  font-size:16px;font-weight:700;
+}
+.best-box span:last-child{color:#FFD700;font-size:22px}
+
+/* ========== BUTTONS ========== */
+.btn-primary{
+  display:block;width:100%;max-width:280px;margin:0 auto 14px;
+  padding:16px 0;border:none;border-radius:14px;
+  font-size:20px;font-weight:800;letter-spacing:3px;cursor:pointer;
+  background:linear-gradient(135deg,#FFD700 0%,#FFA000 100%);
+  color:#1a1a2e;
+  box-shadow:0 4px 20px rgba(255,215,0,.35);
+  transition:transform .12s,box-shadow .12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn-primary:active{transform:scale(.96);box-shadow:0 2px 10px rgba(255,215,0,.2)}
+
+.btn-ghost{
+  display:block;width:100%;max-width:280px;margin:0 auto;
+  padding:12px 0;border:2px solid rgba(255,255,255,.2);border-radius:14px;
+  font-size:16px;font-weight:600;letter-spacing:2px;cursor:pointer;
+  background:transparent;color:#ccd6f6;
+  transition:transform .12s;
+}
+.btn-ghost:active{transform:scale(.96)}
+
+/* ========== HOW TO ========== */
+.how-to{margin-top:28px;font-size:13px;color:#8892b0;line-height:2}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-right:6px}
+.dot.gold{background:#FFD700;box-shadow:0 0 6px #FFD700}
+.dot.black{background:#2d2d2d;border:2px solid #555}
+
+/* ========== HUD ========== */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;padding-top:max(12px,env(safe-area-inset-top));
+  background:linear-gradient(180deg,rgba(10,14,26,.95) 0%,rgba(10,14,26,0) 100%);
+  pointer-events:none;
+}
+.hud-score,.hud-timer{text-align:center}
+.hud-label{font-size:10px;letter-spacing:2px;color:#8892b0;font-weight:600}
+#hud-score-val{font-size:28px;font-weight:900;color:#FFD700;font-variant-numeric:tabular-nums}
+#hud-timer-val{
+  font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;
+  color:#fff;transition:color .3s;
+}
+#hud-timer-val.urgent{color:#ff4757;animation:pulse .5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+#hud-combo{
+  font-size:18px;font-weight:800;color:#00d2ff;
+  opacity:0;transition:opacity .2s;
+  text-shadow:0 0 10px rgba(0,210,255,.5);
+}
+#hud-combo.show{opacity:1}
+
+/* ========== GAME CANVAS ========== */
+#game-canvas{
+  position:fixed;inset:0;z-index:1;
+  width:100%;height:100%;
+  display:block;
+}
+
+/* ========== TAP ZONE ========== */
+#tap-zone{
+  position:fixed;bottom:0;left:0;right:0;
+  height:25%;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+#tap-hint{
+  font-size:16px;font-weight:700;letter-spacing:3px;
+  color:rgba(255,255,255,.15);
+  animation:tapPulse 2s ease-in-out infinite;
+}
+@keyframes tapPulse{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:.3;transform:scale(1.05)}}
+
+/* ========== RESULT SCREEN ========== */
+#result-title{font-size:28px;font-weight:800;margin-bottom:24px;letter-spacing:2px}
+.score-ring{
+  width:140px;height:140px;margin:0 auto 24px;
+  border-radius:50%;
+  border:4px solid #FFD700;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 0 30px rgba(255,215,0,.2),inset 0 0 30px rgba(255,215,0,.05);
+}
+.score-ring-label{font-size:11px;letter-spacing:2px;color:#8892b0;margin-bottom:2px}
+#result-score{font-size:38px;font-weight:900;color:#FFD700}
+
+.stats-row{
+  display:flex;justify-content:center;gap:30px;margin-bottom:24px;
+}
+.stat{text-align:center}
+.stat-val{font-size:24px;font-weight:800;color:#ccd6f6}
+.stat-lbl{font-size:11px;color:#8892b0;letter-spacing:1px;margin-top:2px}
+
+.new-best{
+  font-size:18px;font-weight:800;color:#FFD700;margin-bottom:20px;
+  animation:newBest 1s ease-in-out infinite;
+}
+.new-best.hidden{display:none}
+@keyframes newBest{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* ========== FLOATING SCORE TEXT ========== */
+.float-text{
+  position:fixed;z-index:20;
+  font-size:22px;font-weight:900;
+  pointer-events:none;
+  opacity:0;
+  transition:none;
+  will-change:transform,opacity;
+}
+.float-text.plus{color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,.6)}
+.float-text.minus{color:#ff4757;text-shadow:0 0 8px rgba(255,71,87,.6)}
+
+@media(max-height:600px){
+  .logo-area h1{font-size:32px}
+  .score-ring{width:110px;height:110px}
+  #result-score{font-size:30px}
+}
+  </style>
+</head>
+<body>
+
+  <!-- ===== START SCREEN ===== -->
+  <div id="start-screen" class="screen active">
+    <canvas id="bg-canvas"></canvas>
+    <div class="screen-inner">
+      <div class="logo-area">
+        <div class="claw-icon">
+          <svg viewBox="0 0 100 120" width="80" height="96">
+            <line x1="50" y1="0" x2="50" y2="40" stroke="#fff" stroke-width="3"/>
+            <path d="M30 55 Q50 40 70 55 L65 80 Q50 70 35 80 Z" fill="#FFD700" stroke="#FFA000" stroke-width="2"/>
+            <path d="M30 55 L20 75" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+            <path d="M70 55 L80 75" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1>PICK GAME</h1>
+        <p class="tagline">Swing &bull; Grab &bull; Score!</p>
+      </div>
+      <div class="best-box">
+        <span>&#127942; BEST</span>
+        <span id="menu-best">0</span>
+      </div>
+      <button id="btn-play" class="btn-primary" type="button">PLAY</button>
+      <div class="how-to">
+        <div class="how-row"><span class="dot gold"></span> Coins = + Points</div>
+        <div class="how-row"><span class="dot black"></span> Bombs = - Points</div>
+        <div class="how-row">&#128073; Tap to extend arm &amp; grab!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GAME SCREEN ===== -->
+  <div id="game-screen" class="screen">
+    <div id="hud">
+      <div class="hud-score">
+        <div class="hud-label">SCORE</div>
+        <div id="hud-score-val">0</div>
+      </div>
+      <div id="hud-combo"></div>
+      <div class="hud-timer">
+        <div id="hud-timer-val">45</div>
+        <div class="hud-label">SEC</div>
+      </div>
+    </div>
+    <canvas id="game-canvas"></canvas>
+    <div id="tap-zone">
+      <div id="tap-hint">TAP!</div>
+    </div>
+  </div>
+
+  <!-- ===== RESULT SCREEN ===== -->
+  <div id="result-screen" class="screen">
+    <canvas id="result-bg-canvas"></canvas>
+    <div class="screen-inner">
+      <h2 id="result-title">Time's Up!</h2>
+      <div class="score-ring">
+        <div class="score-ring-label">SCORE</div>
+        <div id="result-score">0</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div id="stat-coins" class="stat-val">0</div><div class="stat-lbl">Coins</div></div>
+        <div class="stat"><div id="stat-bombs" class="stat-val">0</div><div class="stat-lbl">Bombs</div></div>
+        <div class="stat"><div id="stat-combo" class="stat-val">0</div><div class="stat-lbl">Best Combo</div></div>
+      </div>
+      <div id="new-best" class="new-best hidden">&#127942; NEW BEST!</div>
+      <button id="btn-retry" class="btn-primary" type="button">PLAY AGAIN</button>
+      <button id="btn-home" class="btn-ghost" type="button">HOME</button>
+    </div>
+  </div>
+
+  <div id="float-pool"></div>
+
+  <script>
+;(function () {
+  'use strict';
+
+  var GAME_DURATION   = 45;
+  var PENDULUM_SPEED  = 0.025;
+  var MAX_SWING_ANGLE = 1.1;
+  var ARM_EXTEND_SPEED = 14;
+  var ARM_RETRACT_SPEED = 16;
+  var ITEM_COUNT       = 8;
+  var ITEM_MIN_R       = 18;
+  var ITEM_MAX_R       = 34;
+  var COIN_RATIO       = 0.6;
+  var GIFT_CHANCE      = 0.08;
+  var GRAB_RADIUS_PAD  = 8;
+  var STAR_COUNT       = 80;
+
+  var $startScreen  = document.getElementById('start-screen');
+  var $gameScreen   = document.getElementById('game-screen');
+  var $resultScreen = document.getElementById('result-screen');
+  var $canvas       = document.getElementById('game-canvas');
+  var $bgCanvas     = document.getElementById('bg-canvas');
+  var $resultBg     = document.getElementById('result-bg-canvas');
+  var $btnPlay      = document.getElementById('btn-play');
+  var $btnRetry     = document.getElementById('btn-retry');
+  var $btnHome      = document.getElementById('btn-home');
+  var $tapZone      = document.getElementById('tap-zone');
+  var $tapHint      = document.getElementById('tap-hint');
+  var $hudScore     = document.getElementById('hud-score-val');
+  var $hudTimer     = document.getElementById('hud-timer-val');
+  var $hudCombo     = document.getElementById('hud-combo');
+  var $menuBest     = document.getElementById('menu-best');
+  var $resultTitle  = document.getElementById('result-title');
+  var $resultScore  = document.getElementById('result-score');
+  var $statCoins    = document.getElementById('stat-coins');
+  var $statBombs    = document.getElementById('stat-bombs');
+  var $statCombo    = document.getElementById('stat-combo');
+  var $newBest      = document.getElementById('new-best');
+  var $floatPool    = document.getElementById('float-pool');
+
+  var ctx = $canvas.getContext('2d');
+
+  var W, H, dpr;
+  var pivotX, pivotY;
+  var armAngle = 0;
+  var armDir   = 1;
+  var armLen   = 0;
+  var armMaxLen = 0;
+  var armState = 'idle';
+  var armBaseLen = 60;
+
+  var score = 0;
+  var combo = 0;
+  var maxCombo = 0;
+  var coinsGrabbed = 0;
+  var bombsHit = 0;
+  var bestScore = 0;
+  var timeLeft = GAME_DURATION;
+  var timerInterval = null;
+  var running = false;
+  var rafId = null;
+  var grabbedItem = null;
+
+  var items     = [];
+  var particles = [];
+  var floats    = [];
+  var stars     = [];
+
+  var audioCtx = null;
+  function initAudio() {
+    if (audioCtx) return;
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  }
+  function playTone(freq, dur, type, vol) {
+    if (!audioCtx) return;
+    try {
+      var o = audioCtx.createOscillator();
+      var g = audioCtx.createGain();
+      o.type = type || 'sine';
+      o.frequency.value = freq;
+      g.gain.value = vol || 0.12;
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + dur);
+    } catch (e) {}
+  }
+  function sfxGrab()  { playTone(880, 0.12, 'sine', 0.15); playTone(1100, 0.1, 'sine', 0.1); }
+  function sfxBomb()  { playTone(150, 0.25, 'sawtooth', 0.12); }
+  function sfxGift()  { playTone(660, 0.1, 'sine', 0.12); playTone(880, 0.1, 'sine', 0.1); playTone(1100, 0.12, 'sine', 0.1); }
+  function sfxExtend(){ playTone(300, 0.08, 'triangle', 0.06); }
+  function sfxCombo() { playTone(1200, 0.15, 'sine', 0.1); }
+
+  function haptic(style) {
+    try {
+      if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+        window.Capacitor.Plugins.Haptics.impact({ style: style || 'MEDIUM' });
+      } else if (navigator.vibrate) {
+        navigator.vibrate(style === 'HEAVY' ? 40 : 15);
+      }
+    } catch (e) {}
+  }
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function randInt(a, b) { return Math.floor(rand(a, b + 1)); }
+  function dist(x1, y1, x2, y2) { var dx = x1 - x2, dy = y1 - y2; return Math.sqrt(dx * dx + dy * dy); }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    $canvas.width = W * dpr; $canvas.height = H * dpr;
+    $canvas.style.width = W + 'px'; $canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    pivotX = W / 2; pivotY = 60;
+    armMaxLen = H * 0.65;
+    armBaseLen = Math.max(40, H * 0.06);
+    resizeBgCanvas($bgCanvas); resizeBgCanvas($resultBg); initStars();
+  }
+  function resizeBgCanvas(c) {
+    if (!c) return;
+    c.width = W * dpr; c.height = H * dpr;
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+  }
+
+  function initStars() {
+    stars = [];
+    for (var i = 0; i < STAR_COUNT; i++) {
+      stars.push({ x: rand(0, W), y: rand(0, H), r: rand(0.5, 2), a: rand(0.3, 1), s: rand(0.002, 0.008) });
+    }
+  }
+  function drawStarsBg(c) {
+    if (!c) return;
+    var cx = c.getContext('2d');
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.clearRect(0, 0, W, H);
+    var g = cx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#0a0e1a'); g.addColorStop(1, '#141830');
+    cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+    var t = Date.now() * 0.001;
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      var alpha = s.a * (0.6 + 0.4 * Math.sin(t * s.s * 600 + i));
+      cx.beginPath(); cx.arc(s.x, s.y, s.r, 0, 6.2832);
+      cx.fillStyle = 'rgba(255,255,255,' + alpha + ')'; cx.fill();
+    }
+  }
+
+  function spawnItem() {
+    var r = rand(ITEM_MIN_R, ITEM_MAX_R);
+    var padding = r + 10;
+    var minX = padding, maxX = W - padding;
+    var minY = H * 0.35, maxY = H * 0.82;
+    var x, y, tries = 0;
+    do { x = rand(minX, maxX); y = rand(minY, maxY); tries++; } while (tries < 20 && isOverlapping(x, y, r));
+    var roll = Math.random(), type;
+    if (roll < GIFT_CHANCE) type = 'gift';
+    else if (roll < GIFT_CHANCE + COIN_RATIO * (1 - GIFT_CHANCE)) type = 'coin';
+    else type = 'bomb';
+    items.push({ x: x, y: y, r: r, type: type, alive: true, bobPhase: rand(0, 6.28), bobSpeed: rand(1.5, 3), bobAmp: rand(2, 5), baseY: y, glow: 0 });
+  }
+  function isOverlapping(x, y, r) {
+    for (var i = 0; i < items.length; i++) {
+      if (!items[i].alive) continue;
+      if (dist(x, y, items[i].x, items[i].y) < r + items[i].r + 10) return true;
+    }
+    return false;
+  }
+  function fillItems() {
+    var alive = 0;
+    for (var i = 0; i < items.length; i++) if (items[i].alive) alive++;
+    while (alive < ITEM_COUNT) { spawnItem(); alive++; }
+  }
+
+  function emitParticles(x, y, color, count) {
+    for (var i = 0; i < count; i++) {
+      particles.push({ x: x, y: y, vx: rand(-4, 4), vy: rand(-5, 2), r: rand(2, 5), life: 1, decay: rand(0.02, 0.05), color: color });
+    }
+  }
+  function updateParticles() {
+    for (var i = particles.length - 1; i >= 0; i--) {
+      var p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= p.decay;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+  }
+  function drawParticles() {
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      ctx.globalAlpha = p.life; ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * p.life, 0, 6.2832);
+      ctx.fillStyle = p.color; ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function initFloatPool() {
+    for (var i = 0; i < 10; i++) {
+      var el = document.createElement('div');
+      el.className = 'float-text';
+      $floatPool.appendChild(el);
+      floats.push({ el: el, active: false });
+    }
+  }
+  function showFloat(x, y, text, isPositive) {
+    var f = null;
+    for (var i = 0; i < floats.length; i++) { if (!floats[i].active) { f = floats[i]; break; } }
+    if (!f) return;
+    f.active = true; f.el.textContent = text;
+    f.el.className = 'float-text ' + (isPositive ? 'plus' : 'minus');
+    f.el.style.left = x + 'px'; f.el.style.top = y + 'px';
+    f.el.style.opacity = '1'; f.el.style.transform = 'translateY(0)';
+    var startTime = Date.now();
+    function animateFloat() {
+      var progress = (Date.now() - startTime) / 800;
+      if (progress >= 1) { f.el.style.opacity = '0'; f.active = false; return; }
+      f.el.style.transform = 'translateY(' + (-50 * progress) + 'px)';
+      f.el.style.opacity = String(1 - progress);
+      requestAnimationFrame(animateFloat);
+    }
+    requestAnimationFrame(animateFloat);
+  }
+
+  function drawRope(x1, y1, x2, y2) {
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = '#8892b0'; ctx.lineWidth = 3; ctx.stroke();
+  }
+  function drawClaw(x, y, angle, hasItem) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+    ctx.beginPath(); ctx.arc(0, 0, 14, 0, 6.2832);
+    var grad = ctx.createRadialGradient(0, -3, 2, 0, 0, 14);
+    grad.addColorStop(0, '#FFE066'); grad.addColorStop(1, '#FFA000');
+    ctx.fillStyle = grad; ctx.fill();
+    ctx.strokeStyle = '#CC8000'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-8, 8); ctx.lineTo(-16, hasItem ? 18 : 24); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(8, 8); ctx.lineTo(16, hasItem ? 18 : 24); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, 10); ctx.lineTo(0, hasItem ? 20 : 26); ctx.stroke();
+    ctx.restore();
+  }
+  function drawPivot() {
+    ctx.beginPath(); ctx.arc(pivotX, pivotY, 10, 0, 6.2832);
+    var g = ctx.createRadialGradient(pivotX, pivotY - 3, 2, pivotX, pivotY, 10);
+    g.addColorStop(0, '#555'); g.addColorStop(1, '#222');
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = '#666'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, pivotY); ctx.lineTo(W, pivotY);
+    ctx.strokeStyle = 'rgba(136,146,176,0.3)'; ctx.lineWidth = 2; ctx.stroke();
+  }
+
+  function drawItem(item, time) {
+    if (!item.alive) return;
+    var y = item.baseY + Math.sin(time * item.bobSpeed + item.bobPhase) * item.bobAmp;
+    item.y = y;
+    ctx.save();
+    if (item.type === 'coin') {
+      ctx.beginPath(); ctx.arc(item.x, y, item.r + 6, 0, 6.2832);
+      ctx.fillStyle = 'rgba(255,215,0,0.1)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(item.x, y, item.r, 0, 6.2832);
+      var g = ctx.createRadialGradient(item.x - item.r * 0.3, y - item.r * 0.3, item.r * 0.1, item.x, y, item.r);
+      g.addColorStop(0, '#FFE066'); g.addColorStop(0.7, '#FFD700'); g.addColorStop(1, '#CC8800');
+      ctx.fillStyle = g; ctx.fill();
+      ctx.strokeStyle = '#B8860B'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#8B6914';
+      ctx.font = 'bold ' + Math.round(item.r * 0.9) + 'px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('$', item.x, y + 1);
+    } else if (item.type === 'bomb') {
+      ctx.beginPath(); ctx.arc(item.x, y, item.r, 0, 6.2832);
+      var gb = ctx.createRadialGradient(item.x - item.r * 0.3, y - item.r * 0.3, item.r * 0.1, item.x, y, item.r);
+      gb.addColorStop(0, '#4a4a4a'); gb.addColorStop(1, '#1a1a1a');
+      ctx.fillStyle = gb; ctx.fill();
+      ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.strokeStyle = '#ff4757'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      var s = item.r * 0.4;
+      ctx.beginPath(); ctx.moveTo(item.x - s, y - s); ctx.lineTo(item.x + s, y + s); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(item.x + s, y - s); ctx.lineTo(item.x - s, y + s); ctx.stroke();
+    } else if (item.type === 'gift') {
+      var hr = item.r * 0.8;
+      ctx.fillStyle = '#e74c3c';
+      ctx.fillRect(item.x - hr, y - hr, hr * 2, hr * 2);
+      ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 2;
+      ctx.strokeRect(item.x - hr, y - hr, hr * 2, hr * 2);
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(item.x - 3, y - hr, 6, hr * 2);
+      ctx.fillRect(item.x - hr, y - 3, hr * 2, 6);
+      ctx.beginPath(); ctx.arc(item.x, y - hr, 6, 0, 6.2832);
+      ctx.fillStyle = '#FFD700'; ctx.fill();
+      ctx.beginPath(); ctx.arc(item.x, y, item.r + 8, 0, 6.2832);
+      ctx.fillStyle = 'rgba(231,76,60,0.08)'; ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawGameBg() {
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#0a0e1a'); g.addColorStop(0.4, '#0f1428'); g.addColorStop(1, '#141830');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    var t = Date.now() * 0.001;
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      var alpha = s.a * (0.5 + 0.5 * Math.sin(t * s.s * 500 + i));
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.2832);
+      ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')'; ctx.fill();
+    }
+    ctx.beginPath(); ctx.setLineDash([4, 8]);
+    ctx.moveTo(0, H * 0.33); ctx.lineTo(W, H * 0.33);
+    ctx.strokeStyle = 'rgba(136,146,176,0.08)'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function getClawTip() {
+    var totalLen = armBaseLen + armLen;
+    return { x: pivotX + Math.sin(armAngle) * totalLen, y: pivotY + Math.cos(armAngle) * totalLen };
+  }
+  function checkCollision(tip) {
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (!it.alive) continue;
+      if (dist(tip.x, tip.y, it.x, it.y) < it.r + GRAB_RADIUS_PAD) return it;
+    }
+    return null;
+  }
+
+  function processGrab(item) {
+    grabbedItem = item; item.alive = false; armState = 'retracting';
+    var points;
+    if (item.type === 'coin') {
+      var sizeRatio = (item.r - ITEM_MIN_R) / (ITEM_MAX_R - ITEM_MIN_R);
+      points = Math.round(10 + sizeRatio * 40);
+      combo++; if (combo > maxCombo) maxCombo = combo;
+      if (combo >= 3) {
+        points = Math.round(points * (1 + combo * 0.15));
+        $hudCombo.textContent = combo + 'x COMBO!';
+        $hudCombo.classList.add('show'); sfxCombo();
+      }
+      score += points; coinsGrabbed++;
+      emitParticles(item.x, item.y, '#FFD700', 12);
+      showFloat(item.x, item.y - 20, '+' + points, true);
+      sfxGrab(); haptic('LIGHT');
+    } else if (item.type === 'bomb') {
+      var sizeRatio2 = (item.r - ITEM_MIN_R) / (ITEM_MAX_R - ITEM_MIN_R);
+      points = Math.round(10 + sizeRatio2 * 30);
+      score = Math.max(0, score - points); combo = 0; bombsHit++;
+      $hudCombo.classList.remove('show');
+      emitParticles(item.x, item.y, '#ff4757', 15);
+      showFloat(item.x, item.y - 20, '-' + points, false);
+      sfxBomb(); haptic('HEAVY');
+    } else if (item.type === 'gift') {
+      points = randInt(30, 80); combo++;
+      if (combo > maxCombo) maxCombo = combo;
+      score += points; coinsGrabbed++;
+      emitParticles(item.x, item.y, '#e74c3c', 8);
+      emitParticles(item.x, item.y, '#FFD700', 8);
+      showFloat(item.x, item.y - 20, '+' + points + ' GIFT!', true);
+      sfxGift(); haptic('MEDIUM');
+    }
+    $hudScore.textContent = score;
+  }
+
+  function update() {
+    var time = Date.now() * 0.001;
+    if (armState === 'idle') {
+      armAngle += PENDULUM_SPEED * armDir;
+      if (armAngle > MAX_SWING_ANGLE) { armAngle = MAX_SWING_ANGLE; armDir = -1; }
+      if (armAngle < -MAX_SWING_ANGLE) { armAngle = -MAX_SWING_ANGLE; armDir = 1; }
+    }
+    if (armState === 'extending') {
+      armLen += ARM_EXTEND_SPEED;
+      var tip = getClawTip();
+      var hit = checkCollision(tip);
+      if (hit) { processGrab(hit); }
+      else if (armLen >= armMaxLen || tip.y >= H * 0.88) {
+        armState = 'retracting'; combo = 0; $hudCombo.classList.remove('show');
+      }
+    }
+    if (armState === 'retracting') {
+      armLen -= ARM_RETRACT_SPEED;
+      if (armLen <= 0) { armLen = 0; armState = 'idle'; grabbedItem = null; fillItems(); }
+    }
+    updateParticles(); draw(time);
+    if (running) rafId = requestAnimationFrame(update);
+  }
+
+  function draw(time) {
+    ctx.clearRect(0, 0, W, H); drawGameBg();
+    for (var i = 0; i < items.length; i++) drawItem(items[i], time);
+    if (grabbedItem && armState === 'retracting') {
+      var tip = getClawTip();
+      grabbedItem.x = tip.x; grabbedItem.baseY = tip.y; grabbedItem.y = tip.y;
+      var retractRatio = armLen / armMaxLen;
+      var origR = grabbedItem.r;
+      grabbedItem.r = origR * (0.4 + 0.6 * retractRatio);
+      drawItem(grabbedItem, time); grabbedItem.r = origR;
+    }
+    var tip2 = getClawTip();
+    drawRope(pivotX, pivotY, tip2.x, tip2.y);
+    drawClaw(tip2.x, tip2.y, armAngle, grabbedItem != null);
+    drawPivot(); drawParticles();
+  }
+
+  function startTimer() {
+    timeLeft = GAME_DURATION;
+    $hudTimer.textContent = timeLeft;
+    $hudTimer.classList.remove('urgent');
+    timerInterval = setInterval(function () {
+      timeLeft--; $hudTimer.textContent = timeLeft;
+      if (timeLeft <= 10) $hudTimer.classList.add('urgent');
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+  }
+
+  function showScreen(screen) {
+    $startScreen.classList.remove('active');
+    $gameScreen.classList.remove('active');
+    $resultScreen.classList.remove('active');
+    screen.classList.add('active');
+  }
+
+  function startGame() {
+    initAudio(); showScreen($gameScreen);
+    score = 0; combo = 0; maxCombo = 0; coinsGrabbed = 0; bombsHit = 0;
+    armAngle = 0; armDir = 1; armLen = 0; armState = 'idle';
+    grabbedItem = null; items = []; particles = [];
+    $hudScore.textContent = '0'; $hudCombo.classList.remove('show');
+    $tapHint.style.display = '';
+    fillItems(); running = true; startTimer(); update();
+    setTimeout(function () { $tapHint.style.opacity = '0'; }, 3000);
+  }
+
+  function endGame() {
+    running = false; clearInterval(timerInterval);
+    if (rafId) cancelAnimationFrame(rafId);
+    var isNewBest = false;
+    if (score > bestScore) {
+      bestScore = score; isNewBest = true;
+      try { localStorage.setItem('pickgame_best', bestScore); } catch (e) {}
+    }
+    setTimeout(function () {
+      $resultScore.textContent = score;
+      $statCoins.textContent = coinsGrabbed;
+      $statBombs.textContent = bombsHit;
+      $statCombo.textContent = maxCombo;
+      $menuBest.textContent = bestScore;
+      if (isNewBest && score > 0) {
+        $newBest.classList.remove('hidden'); $resultTitle.textContent = 'Amazing!';
+      } else {
+        $newBest.classList.add('hidden'); $resultTitle.textContent = "Time's Up!";
+      }
+      showScreen($resultScreen); drawStarsBg($resultBg);
+    }, 400);
+  }
+
+  function onTap(e) {
+    e.preventDefault();
+    if (!running) return;
+    if (armState !== 'idle') return;
+    armState = 'extending'; sfxExtend(); haptic('LIGHT');
+  }
+
+  $tapZone.addEventListener('touchstart', onTap, { passive: false });
+  $tapZone.addEventListener('mousedown', onTap);
+  $canvas.addEventListener('touchstart', onTap, { passive: false });
+  $canvas.addEventListener('mousedown', onTap);
+
+  $btnPlay.addEventListener('click', function () { startGame(); });
+  $btnRetry.addEventListener('click', function () { startGame(); });
+  $btnHome.addEventListener('click', function () {
+    showScreen($startScreen); drawStarsBg($bgCanvas); $menuBest.textContent = bestScore;
+  });
+
+  function init() {
+    try { bestScore = parseInt(localStorage.getItem('pickgame_best')) || 0; } catch (e) {}
+    $menuBest.textContent = bestScore;
+    resize(); initFloatPool(); drawStarsBg($bgCanvas);
+    window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', function () { setTimeout(resize, 200); });
+    document.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0e1a">
+  <title>Pick Game</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===== START SCREEN ===== -->
+  <div id="start-screen" class="screen active">
+    <canvas id="bg-canvas"></canvas>
+    <div class="screen-inner">
+      <div class="logo-area">
+        <div class="claw-icon">
+          <svg viewBox="0 0 100 120" width="80" height="96">
+            <line x1="50" y1="0" x2="50" y2="40" stroke="#fff" stroke-width="3"/>
+            <path d="M30 55 Q50 40 70 55 L65 80 Q50 70 35 80 Z" fill="#FFD700" stroke="#FFA000" stroke-width="2"/>
+            <path d="M30 55 L20 75" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+            <path d="M70 55 L80 75" stroke="#FFD700" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1>PICK GAME</h1>
+        <p class="tagline">Swing &bull; Grab &bull; Score!</p>
+      </div>
+      <div class="best-box">
+        <span>&#127942; BEST</span>
+        <span id="menu-best">0</span>
+      </div>
+      <button id="btn-play" class="btn-primary" type="button">PLAY</button>
+      <div class="how-to">
+        <div class="how-row"><span class="dot gold"></span> Coins = + Points</div>
+        <div class="how-row"><span class="dot black"></span> Bombs = - Points</div>
+        <div class="how-row">&#128073; Tap to extend arm &amp; grab!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GAME SCREEN ===== -->
+  <div id="game-screen" class="screen">
+    <div id="hud">
+      <div class="hud-score">
+        <div class="hud-label">SCORE</div>
+        <div id="hud-score-val">0</div>
+      </div>
+      <div id="hud-combo"></div>
+      <div class="hud-timer">
+        <div id="hud-timer-val">45</div>
+        <div class="hud-label">SEC</div>
+      </div>
+    </div>
+    <canvas id="game-canvas"></canvas>
+    <div id="tap-zone">
+      <div id="tap-hint">TAP!</div>
+    </div>
+  </div>
+
+  <!-- ===== RESULT SCREEN ===== -->
+  <div id="result-screen" class="screen">
+    <canvas id="result-bg-canvas"></canvas>
+    <div class="screen-inner">
+      <h2 id="result-title">Time's Up!</h2>
+      <div class="score-ring">
+        <div class="score-ring-label">SCORE</div>
+        <div id="result-score">0</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div id="stat-coins" class="stat-val">0</div><div class="stat-lbl">Coins</div></div>
+        <div class="stat"><div id="stat-bombs" class="stat-val">0</div><div class="stat-lbl">Bombs</div></div>
+        <div class="stat"><div id="stat-combo" class="stat-val">0</div><div class="stat-lbl">Best Combo</div></div>
+      </div>
+      <div id="new-best" class="new-best hidden">&#127942; NEW BEST!</div>
+      <button id="btn-retry" class="btn-primary" type="button">PLAY AGAIN</button>
+      <button id="btn-home" class="btn-ghost" type="button">HOME</button>
+    </div>
+  </div>
+
+  <!-- Float text pool (reused DOM elements for +score / -score popups) -->
+  <div id="float-pool"></div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "appId": "com.pickgame.app",
+  "appName": "Pick Game",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0a0e1a"
+    },
+    "Haptics": {}
+  },
+  "android": {
+    "backgroundColor": "#0a0e1a",
+    "allowMixedContent": false,
+    "overScrollMode": "never"
+  }
+}

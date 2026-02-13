@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "npx serve www -l 3000",
+    "backend": "cd backend && python3 app.py",
+    "dev": "npx serve www -l 3000 & cd backend && python3 app.py",
     "android:init": "npx cap add android",
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android",

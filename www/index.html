@@ -12,9 +12,9 @@
 </head>
 <body>
 
-  <!-- ===== START SCREEN ===== -->
-  <div id="start-screen" class="screen active">
-    <canvas id="bg-canvas"></canvas>
+  <!-- ===== AUTH SCREEN ===== -->
+  <div id="auth-screen" class="screen active">
+    <canvas id="auth-bg-canvas"></canvas>
     <div class="screen-inner">
       <div class="logo-area">
         <div class="claw-icon">
@@ -26,18 +26,46 @@
           </svg>
         </div>
         <h1>PICK GAME</h1>
+      </div>
+      <div class="auth-form">
+        <div id="auth-error" class="auth-error"></div>
+        <input id="auth-username" class="input-field" type="text" placeholder="Username" autocomplete="username" maxlength="20">
+        <input id="auth-password" class="input-field" type="password" placeholder="Password" autocomplete="current-password" maxlength="40">
+        <button id="btn-auth" class="btn-primary" type="button">LOGIN</button>
+        <div id="auth-toggle" class="auth-toggle">
+          Don't have an account? <span>Register</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== START SCREEN (with stage select) ===== -->
+  <div id="start-screen" class="screen">
+    <canvas id="bg-canvas"></canvas>
+    <div class="screen-inner scrollable">
+      <div class="welcome-user">Welcome, <span id="display-username">Player</span></div>
+      <div class="logo-area">
+        <h1>PICK GAME</h1>
         <p class="tagline">Swing &bull; Grab &bull; Score!</p>
       </div>
       <div class="best-box">
         <span>&#127942; BEST</span>
         <span id="menu-best">0</span>
       </div>
+      <div id="total-score-box" class="best-box" style="margin-left:10px">
+        <span>TOTAL</span>
+        <span id="menu-total">0</span>
+      </div>
+      <h3 style="margin:18px 0 4px;font-size:16px;letter-spacing:2px;color:#8892b0">SELECT STAGE</h3>
+      <div id="stage-grid" class="stage-grid"></div>
       <button id="btn-play" class="btn-primary" type="button">PLAY</button>
       <div class="how-to">
         <div class="how-row"><span class="dot gold"></span> Coins = + Points</div>
         <div class="how-row"><span class="dot black"></span> Bombs = - Points</div>
-        <div class="how-row">&#128073; Tap to extend arm &amp; grab!</div>
+        <div class="how-row">&#128073; Tap anywhere to grab!</div>
       </div>
+      <button id="btn-leaderboard" class="btn-ghost" type="button" style="margin-top:16px">LEADERBOARD</button>
+      <button id="btn-logout" class="btn-small btn-logout" type="button" style="margin-top:12px">LOGOUT</button>
     </div>
   </div>
 
@@ -48,7 +76,10 @@
         <div class="hud-label">SCORE</div>
         <div id="hud-score-val">0</div>
       </div>
-      <div id="hud-combo"></div>
+      <div style="text-align:center">
+        <div id="hud-combo"></div>
+        <div id="hud-stage"></div>
+      </div>
       <div class="hud-timer">
         <div id="hud-timer-val">45</div>
         <div class="hud-label">SEC</div>
@@ -69,18 +100,30 @@
         <div class="score-ring-label">SCORE</div>
         <div id="result-score">0</div>
       </div>
+      <div id="result-total" class="hidden"></div>
       <div class="stats-row">
         <div class="stat"><div id="stat-coins" class="stat-val">0</div><div class="stat-lbl">Coins</div></div>
         <div class="stat"><div id="stat-bombs" class="stat-val">0</div><div class="stat-lbl">Bombs</div></div>
         <div class="stat"><div id="stat-combo" class="stat-val">0</div><div class="stat-lbl">Best Combo</div></div>
       </div>
       <div id="new-best" class="new-best hidden">&#127942; NEW BEST!</div>
+      <div id="stage-unlocked-msg" class="stage-unlocked hidden"></div>
       <button id="btn-retry" class="btn-primary" type="button">PLAY AGAIN</button>
       <button id="btn-home" class="btn-ghost" type="button">HOME</button>
     </div>
   </div>
 
-  <!-- Float text pool (reused DOM elements for +score / -score popups) -->
+  <!-- ===== LEADERBOARD SCREEN ===== -->
+  <div id="leaderboard-screen" class="screen">
+    <canvas id="lb-bg-canvas"></canvas>
+    <div class="screen-inner scrollable">
+      <h2 style="font-size:24px;font-weight:800;letter-spacing:2px;margin-bottom:20px">LEADERBOARD</h2>
+      <div id="lb-list" style="max-width:320px;margin:0 auto"></div>
+      <button id="btn-lb-back" class="btn-ghost" type="button" style="margin-top:20px">BACK</button>
+    </div>
+  </div>
+
+  <!-- Float text pool -->
   <div id="float-pool"></div>
 
   <script src="js/game.js"></script>

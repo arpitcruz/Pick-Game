@@ -7,3 +7,4 @@ build/
 *.aab
 .DS_Store
 *.log
+*.db

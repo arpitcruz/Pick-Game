@@ -35,9 +35,31 @@ html,body{
 .screen.active{display:flex}
 .screen canvas{position:absolute;inset:0;z-index:0;pointer-events:none}
 .screen-inner{position:relative;z-index:1;text-align:center;padding:20px;width:100%;max-width:400px}
+.screen-inner.scrollable{overflow-y:auto;max-height:90vh}
+
+/* ========== AUTH SCREEN ========== */
+.auth-form{width:100%;max-width:300px;margin:0 auto}
+.input-field{
+  display:block;width:100%;padding:14px 16px;margin-bottom:14px;
+  border:2px solid rgba(255,255,255,.15);border-radius:12px;
+  background:rgba(255,255,255,.06);color:#fff;
+  font-size:16px;font-weight:600;
+  outline:none;transition:border-color .2s;
+}
+.input-field:focus{border-color:#FFD700}
+.input-field::placeholder{color:#555}
+.auth-toggle{
+  margin-top:16px;font-size:14px;color:#8892b0;cursor:pointer;
+}
+.auth-toggle span{color:#FFD700;font-weight:700}
+.auth-error{color:#ff4757;font-size:13px;margin-bottom:12px;min-height:18px}
+.welcome-user{
+  font-size:14px;color:#8892b0;margin-bottom:6px;
+}
+.welcome-user span{color:#FFD700;font-weight:700}
 
 /* ========== START SCREEN ========== */
-.logo-area{margin-bottom:30px}
+.logo-area{margin-bottom:24px}
 .claw-icon{margin:0 auto 12px;animation:bob 2s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .logo-area h1{
@@ -52,7 +74,7 @@ html,body{
 .best-box{
   display:inline-flex;gap:10px;align-items:center;
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
-  border-radius:12px;padding:10px 24px;margin-bottom:28px;
+  border-radius:12px;padding:10px 24px;margin-bottom:20px;
   font-size:16px;font-weight:700;
 }
 .best-box span:last-child{color:#FFD700;font-size:22px}
@@ -69,6 +91,7 @@ html,body{
   -webkit-tap-highlight-color:transparent;
 }
 .btn-primary:active{transform:scale(.96);box-shadow:0 2px 10px rgba(255,215,0,.2)}
+.btn-primary:disabled{opacity:.5;cursor:default;transform:none}
 
 .btn-ghost{
   display:block;width:100%;max-width:280px;margin:0 auto;
@@ -79,8 +102,46 @@ html,body{
 }
 .btn-ghost:active{transform:scale(.96)}
 
+.btn-small{
+  display:inline-block;padding:8px 20px;margin:6px;
+  border:none;border-radius:10px;
+  font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;
+  background:rgba(255,255,255,.1);color:#ccd6f6;
+  transition:transform .12s;
+}
+.btn-small:active{transform:scale(.96)}
+.btn-logout{color:#ff4757;border:1px solid rgba(255,71,87,.3)}
+
+/* ========== STAGE SELECT ========== */
+.stage-grid{
+  display:flex;flex-direction:column;gap:10px;
+  margin:16px auto;max-width:320px;
+}
+.stage-card{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;border-radius:14px;
+  background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.1);
+  cursor:pointer;transition:transform .12s,border-color .2s;
+  text-align:left;
+}
+.stage-card:active{transform:scale(.97)}
+.stage-card.locked{opacity:.4;cursor:default;pointer-events:none}
+.stage-card.selected{border-color:#FFD700;background:rgba(255,215,0,.08)}
+.stage-num{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;
+  background:linear-gradient(135deg,#FFD700,#FFA000);
+  color:#1a1a2e;flex-shrink:0;
+}
+.stage-card.locked .stage-num{background:#333;color:#666}
+.stage-info{flex:1}
+.stage-name{font-size:15px;font-weight:700;color:#ccd6f6}
+.stage-desc{font-size:11px;color:#8892b0;margin-top:2px}
+.stage-lock{font-size:11px;color:#ff4757;margin-top:2px}
+
 /* ========== HOW TO ========== */
-.how-to{margin-top:28px;font-size:13px;color:#8892b0;line-height:2}
+.how-to{margin-top:20px;font-size:13px;color:#8892b0;line-height:2}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-right:6px}
 .dot.gold{background:#FFD700;box-shadow:0 0 6px #FFD700}
 .dot.black{background:#2d2d2d;border:2px solid #555}
@@ -109,6 +170,7 @@ html,body{
   text-shadow:0 0 10px rgba(0,210,255,.5);
 }
 #hud-combo.show{opacity:1}
+#hud-stage{font-size:11px;color:#8892b0;letter-spacing:1px}
 
 /* ========== GAME CANVAS ========== */
 #game-canvas{
@@ -122,7 +184,7 @@ html,body{
   position:fixed;bottom:0;left:0;right:0;
   height:25%;z-index:5;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
+  pointer-events:none;
 }
 #tap-hint{
   font-size:16px;font-weight:700;letter-spacing:3px;
@@ -142,6 +204,7 @@ html,body{
 }
 .score-ring-label{font-size:11px;letter-spacing:2px;color:#8892b0;margin-bottom:2px}
 #result-score{font-size:38px;font-weight:900;color:#FFD700}
+#result-total{font-size:13px;color:#8892b0;margin-top:8px}
 
 .stats-row{
   display:flex;justify-content:center;gap:30px;margin-bottom:24px;
@@ -156,6 +219,8 @@ html,body{
 }
 .new-best.hidden{display:none}
 @keyframes newBest{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.stage-unlocked{font-size:14px;color:#00d2ff;margin-bottom:12px}
+.stage-unlocked.hidden{display:none}
 
 /* ========== FLOATING SCORE TEXT ========== */
 .float-text{
@@ -169,6 +234,7 @@ html,body{
 .float-text.plus{color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,.6)}
 .float-text.minus{color:#ff4757;text-shadow:0 0 8px rgba(255,71,87,.6)}
 
+/* ========== RESPONSIVE ========== */
 @media(max-height:600px){
   .logo-area h1{font-size:32px}
   .score-ring{width:110px;height:110px}
@@ -178,9 +244,9 @@ html,body{
 </head>
 <body>
 
-  <!-- ===== START SCREEN ===== -->
-  <div id="start-screen" class="screen active">
-    <canvas id="bg-canvas"></canvas>
+  <!-- ===== AUTH SCREEN ===== -->
+  <div id="auth-screen" class="screen active">
+    <canvas id="auth-bg-canvas"></canvas>
     <div class="screen-inner">
       <div class="logo-area">
         <div class="claw-icon">
@@ -192,18 +258,46 @@ html,body{
           </svg>
         </div>
         <h1>PICK GAME</h1>
+      </div>
+      <div class="auth-form">
+        <div id="auth-error" class="auth-error"></div>
+        <input id="auth-username" class="input-field" type="text" placeholder="Username" autocomplete="username" maxlength="20">
+        <input id="auth-password" class="input-field" type="password" placeholder="Password" autocomplete="current-password" maxlength="40">
+        <button id="btn-auth" class="btn-primary" type="button">LOGIN</button>
+        <div id="auth-toggle" class="auth-toggle">
+          Don't have an account? <span>Register</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== START SCREEN (with stage select) ===== -->
+  <div id="start-screen" class="screen">
+    <canvas id="bg-canvas"></canvas>
+    <div class="screen-inner scrollable">
+      <div class="welcome-user">Welcome, <span id="display-username">Player</span></div>
+      <div class="logo-area">
+        <h1>PICK GAME</h1>
         <p class="tagline">Swing &bull; Grab &bull; Score!</p>
       </div>
       <div class="best-box">
         <span>&#127942; BEST</span>
         <span id="menu-best">0</span>
       </div>
+      <div id="total-score-box" class="best-box" style="margin-left:10px">
+        <span>TOTAL</span>
+        <span id="menu-total">0</span>
+      </div>
+      <h3 style="margin:18px 0 4px;font-size:16px;letter-spacing:2px;color:#8892b0">SELECT STAGE</h3>
+      <div id="stage-grid" class="stage-grid"></div>
       <button id="btn-play" class="btn-primary" type="button">PLAY</button>
       <div class="how-to">
         <div class="how-row"><span class="dot gold"></span> Coins = + Points</div>
         <div class="how-row"><span class="dot black"></span> Bombs = - Points</div>
-        <div class="how-row">&#128073; Tap to extend arm &amp; grab!</div>
+        <div class="how-row">&#128073; Tap anywhere to grab!</div>
       </div>
+      <button id="btn-leaderboard" class="btn-ghost" type="button" style="margin-top:16px">LEADERBOARD</button>
+      <button id="btn-logout" class="btn-small btn-logout" type="button" style="margin-top:12px">LOGOUT</button>
     </div>
   </div>
 
@@ -214,7 +308,10 @@ html,body{
         <div class="hud-label">SCORE</div>
         <div id="hud-score-val">0</div>
       </div>
-      <div id="hud-combo"></div>
+      <div style="text-align:center">
+        <div id="hud-combo"></div>
+        <div id="hud-stage"></div>
+      </div>
       <div class="hud-timer">
         <div id="hud-timer-val">45</div>
         <div class="hud-label">SEC</div>
@@ -235,26 +332,48 @@ html,body{
         <div class="score-ring-label">SCORE</div>
         <div id="result-score">0</div>
       </div>
+      <div id="result-total" class="hidden"></div>
       <div class="stats-row">
         <div class="stat"><div id="stat-coins" class="stat-val">0</div><div class="stat-lbl">Coins</div></div>
         <div class="stat"><div id="stat-bombs" class="stat-val">0</div><div class="stat-lbl">Bombs</div></div>
         <div class="stat"><div id="stat-combo" class="stat-val">0</div><div class="stat-lbl">Best Combo</div></div>
       </div>
       <div id="new-best" class="new-best hidden">&#127942; NEW BEST!</div>
+      <div id="stage-unlocked-msg" class="stage-unlocked hidden"></div>
       <button id="btn-retry" class="btn-primary" type="button">PLAY AGAIN</button>
       <button id="btn-home" class="btn-ghost" type="button">HOME</button>
     </div>
   </div>
 
+  <!-- ===== LEADERBOARD SCREEN ===== -->
+  <div id="leaderboard-screen" class="screen">
+    <canvas id="lb-bg-canvas"></canvas>
+    <div class="screen-inner scrollable">
+      <h2 style="font-size:24px;font-weight:800;letter-spacing:2px;margin-bottom:20px">LEADERBOARD</h2>
+      <div id="lb-list" style="max-width:320px;margin:0 auto"></div>
+      <button id="btn-lb-back" class="btn-ghost" type="button" style="margin-top:20px">BACK</button>
+    </div>
+  </div>
+
+  <!-- Float text pool -->
   <div id="float-pool"></div>
 
   <script>
+/* ==========================================================
+   PICK GAME — Pendulum Grab Game Engine
+   Auth + Stages + Backend Integration
+   Pure Vanilla JS + Canvas 2D  |  60 fps  |  Zero dependencies
+   ========================================================== */
 ;(function () {
   'use strict';
 
-  var GAME_DURATION   = 45;
-  var PENDULUM_SPEED  = 0.025;
-  var MAX_SWING_ANGLE = 1.1;
+  /* ---------- API config ---------- */
+  var API_BASE = window.location.protocol + '//' + window.location.hostname + ':5000';
+
+  /* ---------- default constants (overridden per stage) ---------- */
+  var GAME_DURATION    = 45;
+  var PENDULUM_SPEED   = 0.025;
+  var MAX_SWING_ANGLE  = 1.1;
   var ARM_EXTEND_SPEED = 14;
   var ARM_RETRACT_SPEED = 16;
   var ITEM_COUNT       = 8;
@@ -265,57 +384,81 @@ html,body{
   var GRAB_RADIUS_PAD  = 8;
   var STAR_COUNT       = 80;
 
+  /* ---------- DOM refs ---------- */
+  var $authScreen   = document.getElementById('auth-screen');
   var $startScreen  = document.getElementById('start-screen');
   var $gameScreen   = document.getElementById('game-screen');
   var $resultScreen = document.getElementById('result-screen');
+  var $lbScreen     = document.getElementById('leaderboard-screen');
   var $canvas       = document.getElementById('game-canvas');
   var $bgCanvas     = document.getElementById('bg-canvas');
+  var $authBg       = document.getElementById('auth-bg-canvas');
   var $resultBg     = document.getElementById('result-bg-canvas');
+  var $lbBg         = document.getElementById('lb-bg-canvas');
+
+  var $authUsername  = document.getElementById('auth-username');
+  var $authPassword  = document.getElementById('auth-password');
+  var $authError    = document.getElementById('auth-error');
+  var $btnAuth      = document.getElementById('btn-auth');
+  var $authToggle   = document.getElementById('auth-toggle');
+
   var $btnPlay      = document.getElementById('btn-play');
   var $btnRetry     = document.getElementById('btn-retry');
   var $btnHome      = document.getElementById('btn-home');
-  var $tapZone      = document.getElementById('tap-zone');
+  var $btnLogout    = document.getElementById('btn-logout');
+  var $btnLeaderboard = document.getElementById('btn-leaderboard');
+  var $btnLbBack    = document.getElementById('btn-lb-back');
   var $tapHint      = document.getElementById('tap-hint');
+
   var $hudScore     = document.getElementById('hud-score-val');
   var $hudTimer     = document.getElementById('hud-timer-val');
   var $hudCombo     = document.getElementById('hud-combo');
+  var $hudStage     = document.getElementById('hud-stage');
+  var $displayUser  = document.getElementById('display-username');
   var $menuBest     = document.getElementById('menu-best');
+  var $menuTotal    = document.getElementById('menu-total');
+  var $stageGrid    = document.getElementById('stage-grid');
+
   var $resultTitle  = document.getElementById('result-title');
   var $resultScore  = document.getElementById('result-score');
+  var $resultTotal  = document.getElementById('result-total');
   var $statCoins    = document.getElementById('stat-coins');
   var $statBombs    = document.getElementById('stat-bombs');
   var $statCombo    = document.getElementById('stat-combo');
   var $newBest      = document.getElementById('new-best');
+  var $stageUnlocked = document.getElementById('stage-unlocked-msg');
+  var $lbList       = document.getElementById('lb-list');
   var $floatPool    = document.getElementById('float-pool');
 
   var ctx = $canvas.getContext('2d');
 
+  /* ---------- auth state ---------- */
+  var authToken  = null;
+  var currentUser = null;
+  var isRegisterMode = false;
+  var userBest   = 0;
+  var userTotal  = 0;
+  var userMaxStage = 1;
+  var stages     = [];
+  var selectedStage = 1;
+
+  /* ---------- game state ---------- */
   var W, H, dpr;
   var pivotX, pivotY;
-  var armAngle = 0;
-  var armDir   = 1;
-  var armLen   = 0;
-  var armMaxLen = 0;
+  var armAngle = 0, armDir = 1;
+  var armLen = 0, armMaxLen = 0;
   var armState = 'idle';
   var armBaseLen = 60;
 
-  var score = 0;
-  var combo = 0;
-  var maxCombo = 0;
-  var coinsGrabbed = 0;
-  var bombsHit = 0;
-  var bestScore = 0;
-  var timeLeft = GAME_DURATION;
-  var timerInterval = null;
-  var running = false;
-  var rafId = null;
+  var score = 0, combo = 0, maxCombo = 0;
+  var coinsGrabbed = 0, bombsHit = 0;
+  var bestScore = 0, timeLeft = GAME_DURATION;
+  var timerInterval = null, running = false, rafId = null;
   var grabbedItem = null;
 
-  var items     = [];
-  var particles = [];
-  var floats    = [];
-  var stars     = [];
+  var items = [], particles = [], floats = [], stars = [];
 
+  /* ---------- audio ---------- */
   var audioCtx = null;
   function initAudio() {
     if (audioCtx) return;
@@ -334,12 +477,13 @@ html,body{
       o.start(); o.stop(audioCtx.currentTime + dur);
     } catch (e) {}
   }
-  function sfxGrab()  { playTone(880, 0.12, 'sine', 0.15); playTone(1100, 0.1, 'sine', 0.1); }
-  function sfxBomb()  { playTone(150, 0.25, 'sawtooth', 0.12); }
-  function sfxGift()  { playTone(660, 0.1, 'sine', 0.12); playTone(880, 0.1, 'sine', 0.1); playTone(1100, 0.12, 'sine', 0.1); }
-  function sfxExtend(){ playTone(300, 0.08, 'triangle', 0.06); }
-  function sfxCombo() { playTone(1200, 0.15, 'sine', 0.1); }
+  function sfxGrab()   { playTone(880, 0.12, 'sine', 0.15); playTone(1100, 0.1, 'sine', 0.1); }
+  function sfxBomb()   { playTone(150, 0.25, 'sawtooth', 0.12); }
+  function sfxGift()   { playTone(660, 0.1, 'sine', 0.12); playTone(880, 0.1, 'sine', 0.1); playTone(1100, 0.12, 'sine', 0.1); }
+  function sfxExtend() { playTone(300, 0.08, 'triangle', 0.06); }
+  function sfxCombo()  { playTone(1200, 0.15, 'sine', 0.1); }
 
+  /* ---------- haptics ---------- */
   function haptic(style) {
     try {
       if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
@@ -350,10 +494,237 @@ html,body{
     } catch (e) {}
   }
 
+  /* ---------- helpers ---------- */
   function rand(a, b) { return a + Math.random() * (b - a); }
   function randInt(a, b) { return Math.floor(rand(a, b + 1)); }
   function dist(x1, y1, x2, y2) { var dx = x1 - x2, dy = y1 - y2; return Math.sqrt(dx * dx + dy * dy); }
 
+  /* ---------- API helpers ---------- */
+  function api(method, path, body) {
+    var opts = {
+      method: method,
+      headers: { 'Content-Type': 'application/json' }
+    };
+    if (authToken) opts.headers['Authorization'] = 'Bearer ' + authToken;
+    if (body) opts.body = JSON.stringify(body);
+    return fetch(API_BASE + path, opts).then(function (r) {
+      return r.json().then(function (data) {
+        if (!r.ok) throw new Error(data.error || 'Request failed');
+        return data;
+      });
+    });
+  }
+
+  /* ============================================================
+     AUTH
+     ============================================================ */
+  function tryAutoLogin() {
+    try {
+      var saved = localStorage.getItem('pickgame_token');
+      var savedUser = localStorage.getItem('pickgame_user');
+      if (saved && savedUser) {
+        authToken = saved;
+        currentUser = savedUser;
+        return api('GET', '/api/me').then(function (data) {
+          currentUser = data.username;
+          userBest = data.best_score;
+          userTotal = data.total_score;
+          userMaxStage = data.max_stage;
+          goToHome();
+        }).catch(function () {
+          // token expired
+          authToken = null;
+          currentUser = null;
+          localStorage.removeItem('pickgame_token');
+          localStorage.removeItem('pickgame_user');
+        });
+      }
+    } catch (e) {}
+    return Promise.resolve();
+  }
+
+  function doAuth() {
+    var username = $authUsername.value.trim();
+    var password = $authPassword.value;
+    $authError.textContent = '';
+
+    if (!username || username.length < 3) {
+      $authError.textContent = 'Username must be at least 3 characters';
+      return;
+    }
+    if (!password || password.length < 4) {
+      $authError.textContent = 'Password must be at least 4 characters';
+      return;
+    }
+
+    $btnAuth.disabled = true;
+    var endpoint = isRegisterMode ? '/api/register' : '/api/login';
+
+    api('POST', endpoint, { username: username, password: password })
+      .then(function (data) {
+        authToken = data.token;
+        currentUser = data.username;
+        userBest = data.best_score || 0;
+        userTotal = data.total_score || 0;
+        userMaxStage = data.max_stage || 1;
+        try {
+          localStorage.setItem('pickgame_token', authToken);
+          localStorage.setItem('pickgame_user', currentUser);
+        } catch (e) {}
+        goToHome();
+      })
+      .catch(function (err) {
+        $authError.textContent = err.message;
+      })
+      .finally(function () {
+        $btnAuth.disabled = false;
+      });
+  }
+
+  function toggleAuthMode() {
+    isRegisterMode = !isRegisterMode;
+    $btnAuth.textContent = isRegisterMode ? 'REGISTER' : 'LOGIN';
+    $authToggle.innerHTML = isRegisterMode
+      ? 'Already have an account? <span>Login</span>'
+      : "Don't have an account? <span>Register</span>";
+    $authError.textContent = '';
+  }
+
+  function logout() {
+    authToken = null;
+    currentUser = null;
+    try {
+      localStorage.removeItem('pickgame_token');
+      localStorage.removeItem('pickgame_user');
+    } catch (e) {}
+    $authUsername.value = '';
+    $authPassword.value = '';
+    $authError.textContent = '';
+    showScreen($authScreen);
+    drawStarsBg($authBg);
+  }
+
+  /* ============================================================
+     STAGES
+     ============================================================ */
+  function loadStages() {
+    return api('GET', '/api/stages').then(function (data) {
+      stages = data.stages;
+      userTotal = data.total_score;
+      renderStageGrid();
+    }).catch(function () {
+      // fallback stages if backend unreachable
+      stages = [
+        { stage: 1, name: 'Easy Pickings', unlocked: true, duration: 45, pendulum_speed: 0.025, max_swing: 1.1, coin_ratio: 0.70, gift_chance: 0.10, item_count: 8, required_score: 0 },
+        { stage: 2, name: 'Getting Tricky', unlocked: false, duration: 40, pendulum_speed: 0.032, max_swing: 1.2, coin_ratio: 0.60, gift_chance: 0.08, item_count: 9, required_score: 100 },
+        { stage: 3, name: 'Speed Demon', unlocked: false, duration: 35, pendulum_speed: 0.040, max_swing: 1.3, coin_ratio: 0.50, gift_chance: 0.06, item_count: 10, required_score: 300 },
+        { stage: 4, name: 'Bomb Storm', unlocked: false, duration: 30, pendulum_speed: 0.048, max_swing: 1.35, coin_ratio: 0.40, gift_chance: 0.05, item_count: 11, required_score: 600 },
+        { stage: 5, name: 'Master Grab', unlocked: false, duration: 25, pendulum_speed: 0.055, max_swing: 1.4, coin_ratio: 0.35, gift_chance: 0.04, item_count: 12, required_score: 1000 }
+      ];
+      renderStageGrid();
+    });
+  }
+
+  function renderStageGrid() {
+    $stageGrid.innerHTML = '';
+    for (var i = 0; i < stages.length; i++) {
+      var s = stages[i];
+      var card = document.createElement('div');
+      card.className = 'stage-card' + (s.unlocked ? '' : ' locked') + (s.stage === selectedStage ? ' selected' : '');
+      card.dataset.stage = s.stage;
+
+      var desc = s.duration + 's';
+      if (s.stage > 1) desc += ' | Faster';
+      if (s.coin_ratio < 0.5) desc += ' | More bombs';
+
+      card.innerHTML =
+        '<div class="stage-num">' + (s.unlocked ? s.stage : '&#128274;') + '</div>' +
+        '<div class="stage-info">' +
+          '<div class="stage-name">' + s.name + '</div>' +
+          (s.unlocked
+            ? '<div class="stage-desc">' + desc + '</div>'
+            : '<div class="stage-lock">Need ' + s.required_score + ' total pts</div>') +
+        '</div>';
+
+      if (s.unlocked) {
+        card.addEventListener('click', (function (stageNum) {
+          return function () { selectStage(stageNum); };
+        })(s.stage));
+      }
+      $stageGrid.appendChild(card);
+    }
+  }
+
+  function selectStage(num) {
+    selectedStage = num;
+    var cards = $stageGrid.querySelectorAll('.stage-card');
+    for (var i = 0; i < cards.length; i++) {
+      cards[i].classList.toggle('selected', parseInt(cards[i].dataset.stage) === num);
+    }
+  }
+
+  function applyStageConfig() {
+    var cfg = null;
+    for (var i = 0; i < stages.length; i++) {
+      if (stages[i].stage === selectedStage) { cfg = stages[i]; break; }
+    }
+    if (!cfg) return;
+    GAME_DURATION   = cfg.duration;
+    PENDULUM_SPEED  = cfg.pendulum_speed;
+    MAX_SWING_ANGLE = cfg.max_swing;
+    COIN_RATIO      = cfg.coin_ratio;
+    GIFT_CHANCE     = cfg.gift_chance;
+    ITEM_COUNT      = cfg.item_count;
+  }
+
+  /* ============================================================
+     LEADERBOARD
+     ============================================================ */
+  function showLeaderboard() {
+    showScreen($lbScreen);
+    drawStarsBg($lbBg);
+    $lbList.innerHTML = '<div style="color:#8892b0">Loading...</div>';
+
+    api('GET', '/api/leaderboard').then(function (data) {
+      var rows = data.leaderboard;
+      if (!rows.length) {
+        $lbList.innerHTML = '<div style="color:#8892b0">No scores yet. Be the first!</div>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        var medal = i === 0 ? '&#129351;' : i === 1 ? '&#129352;' : i === 2 ? '&#129353;' : (i + 1);
+        var isMe = r.username === currentUser;
+        html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;margin-bottom:6px;' +
+          'background:' + (isMe ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.04)') + '">' +
+          '<div style="width:32px;font-size:18px;font-weight:800;text-align:center">' + medal + '</div>' +
+          '<div style="flex:1;text-align:left"><div style="font-weight:700;font-size:15px;color:' + (isMe ? '#FFD700' : '#ccd6f6') + '">' + r.username + '</div>' +
+          '<div style="font-size:11px;color:#8892b0">Total: ' + r.total_score + '</div></div>' +
+          '<div style="font-size:20px;font-weight:900;color:#FFD700">' + r.best_score + '</div>' +
+          '</div>';
+      }
+      $lbList.innerHTML = html;
+    }).catch(function () {
+      $lbList.innerHTML = '<div style="color:#ff4757">Could not load leaderboard</div>';
+    });
+  }
+
+  /* ============================================================
+     NAVIGATION
+     ============================================================ */
+  function goToHome() {
+    $displayUser.textContent = currentUser;
+    $menuBest.textContent = userBest;
+    $menuTotal.textContent = userTotal;
+    bestScore = userBest;
+    loadStages().then(function () {
+      showScreen($startScreen);
+      drawStarsBg($bgCanvas);
+    });
+  }
+
+  /* ---------- resize ---------- */
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = window.innerWidth; H = window.innerHeight;
@@ -363,7 +734,9 @@ html,body{
     pivotX = W / 2; pivotY = 60;
     armMaxLen = H * 0.65;
     armBaseLen = Math.max(40, H * 0.06);
-    resizeBgCanvas($bgCanvas); resizeBgCanvas($resultBg); initStars();
+    resizeBgCanvas($bgCanvas); resizeBgCanvas($resultBg);
+    resizeBgCanvas($authBg); resizeBgCanvas($lbBg);
+    initStars();
   }
   function resizeBgCanvas(c) {
     if (!c) return;
@@ -371,6 +744,7 @@ html,body{
     c.style.width = W + 'px'; c.style.height = H + 'px';
   }
 
+  /* ---------- stars background ---------- */
   function initStars() {
     stars = [];
     for (var i = 0; i < STAR_COUNT; i++) {
@@ -394,6 +768,7 @@ html,body{
     }
   }
 
+  /* ---------- items ---------- */
   function spawnItem() {
     var r = rand(ITEM_MIN_R, ITEM_MAX_R);
     var padding = r + 10;
@@ -420,6 +795,7 @@ html,body{
     while (alive < ITEM_COUNT) { spawnItem(); alive++; }
   }
 
+  /* ---------- particles ---------- */
   function emitParticles(x, y, color, count) {
     for (var i = 0; i < count; i++) {
       particles.push({ x: x, y: y, vx: rand(-4, 4), vy: rand(-5, 2), r: rand(2, 5), life: 1, decay: rand(0.02, 0.05), color: color });
@@ -442,6 +818,7 @@ html,body{
     ctx.globalAlpha = 1;
   }
 
+  /* ---------- float text ---------- */
   function initFloatPool() {
     for (var i = 0; i < 10; i++) {
       var el = document.createElement('div');
@@ -469,6 +846,7 @@ html,body{
     requestAnimationFrame(animateFloat);
   }
 
+  /* ---------- drawing helpers ---------- */
   function drawRope(x1, y1, x2, y2) {
     ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
     ctx.strokeStyle = '#8892b0'; ctx.lineWidth = 3; ctx.stroke();
@@ -557,6 +935,7 @@ html,body{
     ctx.setLineDash([]);
   }
 
+  /* ---------- game loop ---------- */
   function getClawTip() {
     var totalLen = armBaseLen + armLen;
     return { x: pivotX + Math.sin(armAngle) * totalLen, y: pivotY + Math.cos(armAngle) * totalLen };
@@ -647,6 +1026,7 @@ html,body{
     drawPivot(); drawParticles();
   }
 
+  /* ---------- timer ---------- */
   function startTimer() {
     timeLeft = GAME_DURATION;
     $hudTimer.textContent = timeLeft;
@@ -658,20 +1038,34 @@ html,body{
     }, 1000);
   }
 
+  /* ---------- screens ---------- */
   function showScreen(screen) {
-    $startScreen.classList.remove('active');
-    $gameScreen.classList.remove('active');
-    $resultScreen.classList.remove('active');
+    var allScreens = [$authScreen, $startScreen, $gameScreen, $resultScreen, $lbScreen];
+    for (var i = 0; i < allScreens.length; i++) allScreens[i].classList.remove('active');
     screen.classList.add('active');
   }
 
   function startGame() {
-    initAudio(); showScreen($gameScreen);
+    initAudio();
+    applyStageConfig();
+    showScreen($gameScreen);
+
     score = 0; combo = 0; maxCombo = 0; coinsGrabbed = 0; bombsHit = 0;
     armAngle = 0; armDir = 1; armLen = 0; armState = 'idle';
     grabbedItem = null; items = []; particles = [];
-    $hudScore.textContent = '0'; $hudCombo.classList.remove('show');
+
+    $hudScore.textContent = '0';
+    $hudCombo.classList.remove('show');
     $tapHint.style.display = '';
+    $tapHint.style.opacity = '';
+
+    // show stage name in HUD
+    var stageName = '';
+    for (var i = 0; i < stages.length; i++) {
+      if (stages[i].stage === selectedStage) { stageName = stages[i].name; break; }
+    }
+    $hudStage.textContent = 'Stage ' + selectedStage + ': ' + stageName;
+
     fillItems(); running = true; startTimer(); update();
     setTimeout(function () { $tapHint.style.opacity = '0'; }, 3000);
   }
@@ -679,26 +1073,72 @@ html,body{
   function endGame() {
     running = false; clearInterval(timerInterval);
     if (rafId) cancelAnimationFrame(rafId);
-    var isNewBest = false;
-    if (score > bestScore) {
-      bestScore = score; isNewBest = true;
-      try { localStorage.setItem('pickgame_best', bestScore); } catch (e) {}
-    }
+
+    // submit score to backend
+    var oldMaxStage = userMaxStage;
+    api('POST', '/api/scores', {
+      stage: selectedStage,
+      score: score,
+      coins: coinsGrabbed,
+      bombs: bombsHit,
+      max_combo: maxCombo
+    }).then(function (data) {
+      var isNewBest = data.is_new_best;
+      userBest = data.best_score;
+      userTotal = data.total_score;
+      userMaxStage = data.max_stage;
+      bestScore = userBest;
+
+      showResultScreen(isNewBest, data.max_stage > oldMaxStage ? data.max_stage : 0);
+    }).catch(function () {
+      // offline fallback
+      var isNewBest = score > bestScore;
+      if (isNewBest) bestScore = score;
+      showResultScreen(isNewBest, 0);
+    });
+  }
+
+  function showResultScreen(isNewBest, newlyUnlockedStage) {
     setTimeout(function () {
       $resultScore.textContent = score;
       $statCoins.textContent = coinsGrabbed;
       $statBombs.textContent = bombsHit;
       $statCombo.textContent = maxCombo;
       $menuBest.textContent = bestScore;
-      if (isNewBest && score > 0) {
-        $newBest.classList.remove('hidden'); $resultTitle.textContent = 'Amazing!';
+      $menuTotal.textContent = userTotal;
+
+      if (userTotal > 0) {
+        $resultTotal.textContent = 'Total Score: ' + userTotal;
+        $resultTotal.classList.remove('hidden');
       } else {
-        $newBest.classList.add('hidden'); $resultTitle.textContent = "Time's Up!";
+        $resultTotal.classList.add('hidden');
       }
-      showScreen($resultScreen); drawStarsBg($resultBg);
+
+      if (isNewBest && score > 0) {
+        $newBest.classList.remove('hidden');
+        $resultTitle.textContent = 'Amazing!';
+      } else {
+        $newBest.classList.add('hidden');
+        $resultTitle.textContent = "Time's Up!";
+      }
+
+      if (newlyUnlockedStage > 0) {
+        var sName = '';
+        for (var i = 0; i < stages.length; i++) {
+          if (stages[i].stage === newlyUnlockedStage) { sName = stages[i].name; break; }
+        }
+        $stageUnlocked.textContent = 'Stage ' + newlyUnlockedStage + ' Unlocked: ' + sName + '!';
+        $stageUnlocked.classList.remove('hidden');
+      } else {
+        $stageUnlocked.classList.add('hidden');
+      }
+
+      showScreen($resultScreen);
+      drawStarsBg($resultBg);
     }, 400);
   }
 
+  /* ---------- input ---------- */
   function onTap(e) {
     e.preventDefault();
     if (!running) return;
@@ -706,6 +1146,7 @@ html,body{
     armState = 'extending'; sfxExtend(); haptic('LIGHT');
   }
 
+  // tap anywhere on screen to grab
   document.addEventListener('touchstart', function (e) {
     if (!running) return;
     onTap(e);
@@ -715,23 +1156,40 @@ html,body{
     onTap(e);
   });
 
-  $btnPlay.addEventListener('click', function () { startGame(); });
-  $btnRetry.addEventListener('click', function () { startGame(); });
-  $btnHome.addEventListener('click', function () {
-    showScreen($startScreen); drawStarsBg($bgCanvas); $menuBest.textContent = bestScore;
+  /* ---------- button events ---------- */
+  $btnAuth.addEventListener('click', doAuth);
+  $authToggle.addEventListener('click', toggleAuthMode);
+  $authPassword.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') doAuth();
   });
 
+  $btnPlay.addEventListener('click', function () { startGame(); });
+  $btnRetry.addEventListener('click', function () { startGame(); });
+  $btnHome.addEventListener('click', function () { goToHome(); });
+  $btnLogout.addEventListener('click', function () { logout(); });
+  $btnLeaderboard.addEventListener('click', function () { showLeaderboard(); });
+  $btnLbBack.addEventListener('click', function () { goToHome(); });
+
+  /* ---------- init ---------- */
   function init() {
-    try { bestScore = parseInt(localStorage.getItem('pickgame_best')) || 0; } catch (e) {}
-    $menuBest.textContent = bestScore;
-    resize(); initFloatPool(); drawStarsBg($bgCanvas);
+    resize();
+    initFloatPool();
+    drawStarsBg($authBg);
+
     window.addEventListener('resize', resize);
     window.addEventListener('orientationchange', function () { setTimeout(resize, 200); });
     document.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
+
+    // try auto-login
+    tryAutoLogin();
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
 })();
   </script>
 </body>

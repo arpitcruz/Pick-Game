@@ -24,9 +24,31 @@ html,body{
 .screen.active{display:flex}
 .screen canvas{position:absolute;inset:0;z-index:0;pointer-events:none}
 .screen-inner{position:relative;z-index:1;text-align:center;padding:20px;width:100%;max-width:400px}
+.screen-inner.scrollable{overflow-y:auto;max-height:90vh}
+
+/* ========== AUTH SCREEN ========== */
+.auth-form{width:100%;max-width:300px;margin:0 auto}
+.input-field{
+  display:block;width:100%;padding:14px 16px;margin-bottom:14px;
+  border:2px solid rgba(255,255,255,.15);border-radius:12px;
+  background:rgba(255,255,255,.06);color:#fff;
+  font-size:16px;font-weight:600;
+  outline:none;transition:border-color .2s;
+}
+.input-field:focus{border-color:#FFD700}
+.input-field::placeholder{color:#555}
+.auth-toggle{
+  margin-top:16px;font-size:14px;color:#8892b0;cursor:pointer;
+}
+.auth-toggle span{color:#FFD700;font-weight:700}
+.auth-error{color:#ff4757;font-size:13px;margin-bottom:12px;min-height:18px}
+.welcome-user{
+  font-size:14px;color:#8892b0;margin-bottom:6px;
+}
+.welcome-user span{color:#FFD700;font-weight:700}
 
 /* ========== START SCREEN ========== */
-.logo-area{margin-bottom:30px}
+.logo-area{margin-bottom:24px}
 .claw-icon{margin:0 auto 12px;animation:bob 2s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .logo-area h1{
@@ -41,7 +63,7 @@ html,body{
 .best-box{
   display:inline-flex;gap:10px;align-items:center;
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
-  border-radius:12px;padding:10px 24px;margin-bottom:28px;
+  border-radius:12px;padding:10px 24px;margin-bottom:20px;
   font-size:16px;font-weight:700;
 }
 .best-box span:last-child{color:#FFD700;font-size:22px}
@@ -58,6 +80,7 @@ html,body{
   -webkit-tap-highlight-color:transparent;
 }
 .btn-primary:active{transform:scale(.96);box-shadow:0 2px 10px rgba(255,215,0,.2)}
+.btn-primary:disabled{opacity:.5;cursor:default;transform:none}
 
 .btn-ghost{
   display:block;width:100%;max-width:280px;margin:0 auto;
@@ -68,8 +91,46 @@ html,body{
 }
 .btn-ghost:active{transform:scale(.96)}
 
+.btn-small{
+  display:inline-block;padding:8px 20px;margin:6px;
+  border:none;border-radius:10px;
+  font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;
+  background:rgba(255,255,255,.1);color:#ccd6f6;
+  transition:transform .12s;
+}
+.btn-small:active{transform:scale(.96)}
+.btn-logout{color:#ff4757;border:1px solid rgba(255,71,87,.3)}
+
+/* ========== STAGE SELECT ========== */
+.stage-grid{
+  display:flex;flex-direction:column;gap:10px;
+  margin:16px auto;max-width:320px;
+}
+.stage-card{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;border-radius:14px;
+  background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.1);
+  cursor:pointer;transition:transform .12s,border-color .2s;
+  text-align:left;
+}
+.stage-card:active{transform:scale(.97)}
+.stage-card.locked{opacity:.4;cursor:default;pointer-events:none}
+.stage-card.selected{border-color:#FFD700;background:rgba(255,215,0,.08)}
+.stage-num{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;
+  background:linear-gradient(135deg,#FFD700,#FFA000);
+  color:#1a1a2e;flex-shrink:0;
+}
+.stage-card.locked .stage-num{background:#333;color:#666}
+.stage-info{flex:1}
+.stage-name{font-size:15px;font-weight:700;color:#ccd6f6}
+.stage-desc{font-size:11px;color:#8892b0;margin-top:2px}
+.stage-lock{font-size:11px;color:#ff4757;margin-top:2px}
+
 /* ========== HOW TO ========== */
-.how-to{margin-top:28px;font-size:13px;color:#8892b0;line-height:2}
+.how-to{margin-top:20px;font-size:13px;color:#8892b0;line-height:2}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-right:6px}
 .dot.gold{background:#FFD700;box-shadow:0 0 6px #FFD700}
 .dot.black{background:#2d2d2d;border:2px solid #555}
@@ -98,6 +159,7 @@ html,body{
   text-shadow:0 0 10px rgba(0,210,255,.5);
 }
 #hud-combo.show{opacity:1}
+#hud-stage{font-size:11px;color:#8892b0;letter-spacing:1px}
 
 /* ========== GAME CANVAS ========== */
 #game-canvas{
@@ -111,7 +173,7 @@ html,body{
   position:fixed;bottom:0;left:0;right:0;
   height:25%;z-index:5;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
+  pointer-events:none;
 }
 #tap-hint{
   font-size:16px;font-weight:700;letter-spacing:3px;
@@ -131,6 +193,7 @@ html,body{
 }
 .score-ring-label{font-size:11px;letter-spacing:2px;color:#8892b0;margin-bottom:2px}
 #result-score{font-size:38px;font-weight:900;color:#FFD700}
+#result-total{font-size:13px;color:#8892b0;margin-top:8px}
 
 .stats-row{
   display:flex;justify-content:center;gap:30px;margin-bottom:24px;
@@ -145,6 +208,8 @@ html,body{
 }
 .new-best.hidden{display:none}
 @keyframes newBest{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.stage-unlocked{font-size:14px;color:#00d2ff;margin-bottom:12px}
+.stage-unlocked.hidden{display:none}
 
 /* ========== FLOATING SCORE TEXT ========== */
 .float-text{
@@ -157,8 +222,6 @@ html,body{
 }
 .float-text.plus{color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,.6)}
 .float-text.minus{color:#ff4757;text-shadow:0 0 8px rgba(255,71,87,.6)}
-
-/* ========== PARTICLES (canvas-drawn, no CSS needed) ========== */
 
 /* ========== RESPONSIVE ========== */
 @media(max-height:600px){
